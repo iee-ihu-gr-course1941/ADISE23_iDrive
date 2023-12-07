@@ -9,6 +9,10 @@
 
     <h1>Hello, World!</h1>
     <p>E FARAEEEEEE</p>
+    <form action="includes/dbh.inc.php" method="post">
+        <button type="submit">Connect to Database</button>
+    </form>
+
     
 </body>
 </html>
