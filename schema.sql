@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS `board` (
   `b_color` enum('G','R','B','Y','W') NOT NULL,
   `piece_color` enum('G','R','B','Y') DEFAULT NULL,
   `piece` enum('1','2','3','4') DEFAULT NULL,
-  `status` enum('BASE_Y','BASE_G','BASE_B','BASE_R','STARTING_Y','STARTING_G','STARTING_B','STARTING_R','PLAYING','SAFE') DEFAULT NULL,
+  `status` enum('BASE_Y','BASE_G','BASE_B','BASE_R','STARTING_Y','STARTING_G','STARTING_B','STARTING_R','PLAYING','SAFE_Y','SAFE_G','SAFE_B','SAFE_R') DEFAULT NULL,
   PRIMARY KEY (`x`,`y`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -37,58 +37,58 @@ INSERT INTO `board` (`x`, `y`, `b_color`, `piece_color`, `piece`, `status`) VALU
 	(2, 1, 'Y', 'Y', '2', 'BASE_Y'),
 	(2, 2, 'Y', 'Y', '4', 'BASE_Y'),
 	(2, 5, 'W', NULL, NULL, 'PLAYING'),
-	(2, 6, 'G', NULL, NULL, 'SAFE'),
+	(2, 6, 'G', NULL, NULL, 'SAFE_G'),
 	(2, 7, 'W', NULL, NULL, 'PLAYING'),
 	(2, 10, 'G', 'G', '4', 'BASE_G'),
 	(2, 11, 'G', 'G', '2', 'BASE_G'),
 	(3, 5, 'W', NULL, NULL, 'PLAYING'),
-	(3, 6, 'G', NULL, NULL, 'SAFE'),
+	(3, 6, 'G', NULL, NULL, 'SAFE_G'),
 	(3, 7, 'W', NULL, NULL, 'PLAYING'),
 	(4, 5, 'W', NULL, NULL, 'PLAYING'),
-	(4, 6, 'G', NULL, NULL, 'SAFE'),
+	(4, 6, 'G', NULL, NULL, 'SAFE_G'),
 	(4, 7, 'W', NULL, NULL, 'PLAYING'),
 	(5, 1, 'Y', NULL, NULL, 'STARTING_Y'),
 	(5, 2, 'W', NULL, NULL, 'PLAYING'),
 	(5, 3, 'W', NULL, NULL, 'PLAYING'),
 	(5, 4, 'W', NULL, NULL, 'PLAYING'),
 	(5, 5, 'W', NULL, NULL, 'PLAYING'),
-	(5, 6, 'G', NULL, NULL, 'SAFE'),
+	(5, 6, 'G', NULL, NULL, 'SAFE_G'),
 	(5, 7, 'W', NULL, NULL, 'PLAYING'),
 	(5, 8, 'W', NULL, NULL, 'PLAYING'),
 	(5, 9, 'W', NULL, NULL, 'PLAYING'),
 	(5, 10, 'W', NULL, NULL, 'PLAYING'),
 	(5, 11, 'W', NULL, NULL, 'PLAYING'),
 	(6, 1, 'W', NULL, NULL, 'PLAYING'),
-	(6, 2, 'Y', NULL, NULL, 'SAFE'),
-	(6, 3, 'Y', NULL, NULL, 'SAFE'),
-	(6, 4, 'Y', NULL, NULL, 'SAFE'),
-	(6, 5, 'Y', NULL, NULL, 'SAFE'),
-	(6, 7, 'B', NULL, NULL, 'SAFE'),
-	(6, 8, 'B', NULL, NULL, 'SAFE'),
-	(6, 9, 'B', NULL, NULL, 'SAFE'),
-	(6, 10, 'B', NULL, NULL, 'SAFE'),
+	(6, 2, 'Y', NULL, NULL, 'SAFE_Y'),
+	(6, 3, 'Y', NULL, NULL, 'SAFE_Y'),
+	(6, 4, 'Y', NULL, NULL, 'SAFE_Y'),
+	(6, 5, 'Y', NULL, NULL, 'SAFE_Y'),
+	(6, 7, 'B', NULL, NULL, 'SAFE_B'),
+	(6, 8, 'B', NULL, NULL, 'SAFE_B'),
+	(6, 9, 'B', NULL, NULL, 'SAFE_B'),
+	(6, 10, 'B', NULL, NULL, 'SAFE_B'),
 	(6, 11, 'W', NULL, NULL, 'PLAYING'),
 	(7, 1, 'W', NULL, NULL, 'PLAYING'),
 	(7, 2, 'W', NULL, NULL, 'PLAYING'),
 	(7, 3, 'W', NULL, NULL, 'PLAYING'),
 	(7, 4, 'W', NULL, NULL, 'PLAYING'),
 	(7, 5, 'W', NULL, NULL, 'PLAYING'),
-	(7, 6, 'R', NULL, NULL, 'SAFE'),
+	(7, 6, 'R', NULL, NULL, 'SAFE_R'),
 	(7, 7, 'W', NULL, NULL, 'PLAYING'),
 	(7, 8, 'W', NULL, NULL, 'PLAYING'),
 	(7, 9, 'W', NULL, NULL, 'PLAYING'),
 	(7, 10, 'W', NULL, NULL, 'PLAYING'),
 	(7, 11, 'B', NULL, NULL, 'STARTING_B'),
 	(8, 5, 'W', NULL, NULL, 'PLAYING'),
-	(8, 6, 'R', NULL, NULL, 'SAFE'),
+	(8, 6, 'R', NULL, NULL, 'SAFE_R'),
 	(8, 7, 'W', NULL, NULL, 'PLAYING'),
 	(9, 5, 'W', NULL, NULL, 'PLAYING'),
-	(9, 6, 'R', NULL, NULL, 'SAFE'),
+	(9, 6, 'R', NULL, NULL, 'SAFE_R'),
 	(9, 7, 'W', NULL, NULL, 'PLAYING'),
 	(10, 1, 'R', 'R', '2', 'BASE_R'),
 	(10, 2, 'R', 'R', '4', 'BASE_R'),
 	(10, 5, 'W', NULL, NULL, 'PLAYING'),
-	(10, 6, 'R', NULL, NULL, 'SAFE'),
+	(10, 6, 'R', NULL, NULL, 'SAFE_R'),
 	(10, 7, 'W', NULL, NULL, 'PLAYING'),
 	(10, 10, 'B', 'B', '4', 'BASE_B'),
 	(10, 11, 'B', 'B', '2', 'BASE_B'),
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS `board_empty` (
   `b_color` enum('G','R','B','Y','W') NOT NULL,
   `piece_color` enum('G','R','B','Y') DEFAULT NULL,
   `piece` enum('1','2','3','4') DEFAULT NULL,
-  `status` enum('BASE_Y','BASE_G','BASE_B','BASE_R','STARTING_Y','STARTING_G','STARTING_B','STARTING_R','PLAYING','SAFE') DEFAULT NULL,
+  `status` enum('BASE_Y','BASE_G','BASE_B','BASE_R','STARTING_Y','STARTING_G','STARTING_B','STARTING_R','PLAYING','SAFE_Y','SAFE_G','SAFE_B','SAFE_R') DEFAULT NULL,
   PRIMARY KEY (`x`,`y`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 
@@ -123,58 +123,58 @@ INSERT INTO `board_empty` (`x`, `y`, `b_color`, `piece_color`, `piece`, `status`
 	(2, 1, 'Y', 'Y', '2', 'BASE_Y'),
 	(2, 2, 'Y', 'Y', '4', 'BASE_Y'),
 	(2, 5, 'W', NULL, NULL, 'PLAYING'),
-	(2, 6, 'G', NULL, NULL, 'SAFE'),
+	(2, 6, 'G', NULL, NULL, 'SAFE_G'),
 	(2, 7, 'W', NULL, NULL, 'PLAYING'),
 	(2, 10, 'G', 'G', '4', 'BASE_G'),
 	(2, 11, 'G', 'G', '2', 'BASE_G'),
 	(3, 5, 'W', NULL, NULL, 'PLAYING'),
-	(3, 6, 'G', NULL, NULL, 'SAFE'),
+	(3, 6, 'G', NULL, NULL, 'SAFE_G'),
 	(3, 7, 'W', NULL, NULL, 'PLAYING'),
 	(4, 5, 'W', NULL, NULL, 'PLAYING'),
-	(4, 6, 'G', NULL, NULL, 'SAFE'),
+	(4, 6, 'G', NULL, NULL, 'SAFE_G'),
 	(4, 7, 'W', NULL, NULL, 'PLAYING'),
 	(5, 1, 'Y', NULL, NULL, 'STARTING_Y'),
 	(5, 2, 'W', NULL, NULL, 'PLAYING'),
 	(5, 3, 'W', NULL, NULL, 'PLAYING'),
 	(5, 4, 'W', NULL, NULL, 'PLAYING'),
 	(5, 5, 'W', NULL, NULL, 'PLAYING'),
-	(5, 6, 'G', NULL, NULL, 'SAFE'),
+	(5, 6, 'G', NULL, NULL, 'SAFE_G'),
 	(5, 7, 'W', NULL, NULL, 'PLAYING'),
 	(5, 8, 'W', NULL, NULL, 'PLAYING'),
 	(5, 9, 'W', NULL, NULL, 'PLAYING'),
 	(5, 10, 'W', NULL, NULL, 'PLAYING'),
 	(5, 11, 'W', NULL, NULL, 'PLAYING'),
 	(6, 1, 'W', NULL, NULL, 'PLAYING'),
-	(6, 2, 'Y', NULL, NULL, 'SAFE'),
-	(6, 3, 'Y', NULL, NULL, 'SAFE'),
-	(6, 4, 'Y', NULL, NULL, 'SAFE'),
-	(6, 5, 'Y', NULL, NULL, 'SAFE'),
-	(6, 7, 'B', NULL, NULL, 'SAFE'),
-	(6, 8, 'B', NULL, NULL, 'SAFE'),
-	(6, 9, 'B', NULL, NULL, 'SAFE'),
-	(6, 10, 'B', NULL, NULL, 'SAFE'),
+	(6, 2, 'Y', NULL, NULL, 'SAFE_Y'),
+	(6, 3, 'Y', NULL, NULL, 'SAFE_Y'),
+	(6, 4, 'Y', NULL, NULL, 'SAFE_Y'),
+	(6, 5, 'Y', NULL, NULL, 'SAFE_Y'),
+	(6, 7, 'B', NULL, NULL, 'SAFE_B'),
+	(6, 8, 'B', NULL, NULL, 'SAFE_B'),
+	(6, 9, 'B', NULL, NULL, 'SAFE_B'),
+	(6, 10, 'B', NULL, NULL, 'SAFE_B'),
 	(6, 11, 'W', NULL, NULL, 'PLAYING'),
 	(7, 1, 'W', NULL, NULL, 'PLAYING'),
 	(7, 2, 'W', NULL, NULL, 'PLAYING'),
 	(7, 3, 'W', NULL, NULL, 'PLAYING'),
 	(7, 4, 'W', NULL, NULL, 'PLAYING'),
 	(7, 5, 'W', NULL, NULL, 'PLAYING'),
-	(7, 6, 'R', NULL, NULL, 'SAFE'),
+	(7, 6, 'R', NULL, NULL, 'SAFE_R'),
 	(7, 7, 'W', NULL, NULL, 'PLAYING'),
 	(7, 8, 'W', NULL, NULL, 'PLAYING'),
 	(7, 9, 'W', NULL, NULL, 'PLAYING'),
 	(7, 10, 'W', NULL, NULL, 'PLAYING'),
 	(7, 11, 'B', NULL, NULL, 'STARTING_B'),
 	(8, 5, 'W', NULL, NULL, 'PLAYING'),
-	(8, 6, 'R', NULL, NULL, 'SAFE'),
+	(8, 6, 'R', NULL, NULL, 'SAFE_R'),
 	(8, 7, 'W', NULL, NULL, 'PLAYING'),
 	(9, 5, 'W', NULL, NULL, 'PLAYING'),
-	(9, 6, 'R', NULL, NULL, 'SAFE'),
+	(9, 6, 'R', NULL, NULL, 'SAFE_R'),
 	(9, 7, 'W', NULL, NULL, 'PLAYING'),
 	(10, 1, 'R', 'R', '2', 'BASE_R'),
 	(10, 2, 'R', 'R', '4', 'BASE_R'),
 	(10, 5, 'W', NULL, NULL, 'PLAYING'),
-	(10, 6, 'R', NULL, NULL, 'SAFE'),
+	(10, 6, 'R', NULL, NULL, 'SAFE_R'),
 	(10, 7, 'W', NULL, NULL, 'PLAYING'),
 	(10, 10, 'B', 'B', '4', 'BASE_B'),
 	(10, 11, 'B', 'B', '2', 'BASE_B'),
@@ -194,6 +194,14 @@ REPLACE INTO board SELECT * FROM board_empty;
 END//
 DELIMITER ;
 
+-- Dumping structure for procedure ludo.clean_players
+DELIMITER //
+CREATE PROCEDURE `clean_players`()
+BEGIN
+REPLACE INTO players SELECT * FROM players_empty;
+END//
+DELIMITER ;
+
 -- Dumping structure for table ludo.game_status
 CREATE TABLE IF NOT EXISTS `game_status` (
   `status` enum('not active','initialized','started','ended','aborded') NOT NULL DEFAULT 'not active',
@@ -204,25 +212,76 @@ CREATE TABLE IF NOT EXISTS `game_status` (
 
 -- Dumping data for table ludo.game_status: ~1 rows (approximately)
 INSERT INTO `game_status` (`status`, `p_turn`, `result`, `last_change`) VALUES
-	('started', 'Y', NULL, '2023-12-23 12:11:41');
+	('started', 'Y', 'Y', '2024-01-01 19:04:11');
 
 -- Dumping structure for procedure ludo.move_piece
 DELIMITER //
-CREATE PROCEDURE `move_piece`(x1 tinyint, y1 tinyint, x2 tinyint, y2 tinyint)
+CREATE PROCEDURE `move_piece`(
+	IN `x1` TINYINT,
+	IN `y1` TINYINT,
+	IN `x2` TINYINT,
+	IN `y2` TINYINT
+)
 BEGIN
-	declare  p, p_color char;
-	
-	select  piece, piece_color into p, p_color 
-	FROM `board` WHERE X=x1 AND Y=y1;
-	
-	update board
-	set piece=p, piece_color=p_color
-	where x=x2 and y=y2;
-	
-	UPDATE board
-	SET piece=null, piece_color=null
-	WHERE X=x1 AND Y=y1;
+    DECLARE p, p_color CHAR;
+    DECLARE p_2, p_2_color CHAR;
+    DECLARE next_player_color CHAR;
+    DECLARE next_player_token CHAR;
+    DECLARE found_player BOOLEAN DEFAULT FALSE;
+    
+    SELECT piece, piece_color INTO p_2, p_2_color 
+    FROM `board` WHERE X = x2 AND Y = y2;
+    
+	IF p_2 IS NOT NULL AND p_2_color IS NOT NULL THEN
+    UPDATE board
+    SET piece = p_2, piece_color = p_2_color
+    WHERE status = CONCAT('BASE_', p_2_color) AND piece IS NULL;
+    
+    UPDATE board
+    SET piece = NULL, piece_color = NULL
+    WHERE x = x2 AND y = y2;
+	END IF;
 
+
+    SELECT piece, piece_color INTO p, p_color 
+    FROM `board` WHERE X = x1 AND Y = y1;
+
+    UPDATE board
+    SET piece = p, piece_color = p_color
+    WHERE x = x2 AND y = y2;
+
+    UPDATE board
+    SET piece = NULL, piece_color = NULL
+    WHERE X = x1 AND Y = y1;
+
+    SET next_player_color =
+        CASE
+            WHEN p_color = 'Y' THEN 'G'
+            WHEN p_color = 'G' THEN 'B'
+            WHEN p_color = 'B' THEN 'R'
+            WHEN p_color = 'R' THEN 'Y'
+        END;
+
+    WHILE NOT found_player DO
+        SELECT token INTO next_player_token
+        FROM `players`
+        WHERE piece_color = next_player_color;
+
+        IF next_player_token IS NOT NULL THEN
+            SET found_player = TRUE; -- Break the loop
+        ELSE
+            SET next_player_color =
+                CASE
+                    WHEN next_player_color = 'Y' THEN 'G'
+                    WHEN next_player_color = 'G' THEN 'B'
+                    WHEN next_player_color = 'B' THEN 'R'
+                    WHEN next_player_color = 'R' THEN 'Y'
+                END;
+        END IF;
+    END WHILE;
+
+    UPDATE game_status
+    SET p_turn = next_player_color;
 END//
 DELIMITER ;
 
@@ -237,10 +296,26 @@ CREATE TABLE IF NOT EXISTS `players` (
 
 -- Dumping data for table ludo.players: ~4 rows (approximately)
 INSERT INTO `players` (`username`, `piece_color`, `token`, `last_action`) VALUES
-	(NULL, 'Y', NULL, '2023-12-23 13:07:21'),
-	(NULL, 'G', NULL, '2023-12-23 11:40:50'),
-	(NULL, 'B', NULL, '2023-12-15 22:43:31'),
-	(NULL, 'R', NULL, '2023-12-22 15:07:58');
+	(NULL, 'Y', NULL, '2024-01-02 20:07:09'),
+	(NULL, 'G', NULL, NULL),
+	(NULL, 'B', NULL, NULL),
+	(NULL, 'R', NULL, NULL);
+
+-- Dumping structure for table ludo.players_empty
+CREATE TABLE IF NOT EXISTS `players_empty` (
+  `username` varchar(20) DEFAULT NULL,
+  `piece_color` enum('Y','G','B','R') NOT NULL,
+  `token` varchar(100) DEFAULT NULL,
+  `last_action` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`piece_color`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+
+-- Dumping data for table ludo.players_empty: ~4 rows (approximately)
+INSERT INTO `players_empty` (`username`, `piece_color`, `token`, `last_action`) VALUES
+	(NULL, 'Y', NULL, NULL),
+	(NULL, 'G', NULL, NULL),
+	(NULL, 'B', NULL, NULL),
+	(NULL, 'R', NULL, NULL);
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
