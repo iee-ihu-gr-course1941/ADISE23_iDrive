@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS `board` (
   `x` smallint(2) NOT NULL,
   `y` smallint(2) NOT NULL,
   `b_color` enum('G','R','B','Y','W') NOT NULL,
-  `piece_color` enum('G','R','B','Y') DEFAULT NULL,
-  `piece` enum('1','2','3','4') DEFAULT NULL,
+  `piece_color` varchar(10) DEFAULT NULL,
+  `piece` varchar(10) DEFAULT NULL,
   `status` enum('BASE_Y','BASE_G','BASE_B','BASE_R','STARTING_Y','STARTING_G','STARTING_B','STARTING_R','PLAYING','SAFE_Y','SAFE_G','SAFE_B','SAFE_R') DEFAULT NULL,
   PRIMARY KEY (`x`,`y`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -105,8 +105,8 @@ CREATE TABLE IF NOT EXISTS `board_empty` (
   `x` smallint(2) NOT NULL,
   `y` smallint(2) NOT NULL,
   `b_color` enum('G','R','B','Y','W') NOT NULL,
-  `piece_color` enum('G','R','B','Y') DEFAULT NULL,
-  `piece` enum('1','2','3','4') DEFAULT NULL,
+  `piece_color` varchar(10) DEFAULT NULL,
+  `piece` varchar(10) DEFAULT NULL,
   `status` enum('BASE_Y','BASE_G','BASE_B','BASE_R','STARTING_Y','STARTING_G','STARTING_B','STARTING_R','PLAYING','SAFE_Y','SAFE_G','SAFE_B','SAFE_R') DEFAULT NULL,
   PRIMARY KEY (`x`,`y`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
@@ -210,50 +210,165 @@ CREATE TABLE IF NOT EXISTS `game_status` (
   `last_change` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table ludo.game_status: ~1 rows (approximately)
+-- Dumping data for table ludo.game_status: ~2 rows (approximately)
 INSERT INTO `game_status` (`status`, `p_turn`, `result`, `last_change`) VALUES
 	('started', 'Y', 'Y', '2024-01-01 19:04:11');
 
 -- Dumping structure for procedure ludo.move_piece
 DELIMITER //
 CREATE PROCEDURE `move_piece`(
-	IN `x1` TINYINT,
-	IN `y1` TINYINT,
-	IN `x2` TINYINT,
-	IN `y2` TINYINT
+	IN `x1` tinyint,
+	IN `y1` tinyint,
+	IN `x2` tinyint,
+	IN `y2` tinyint
 )
 BEGIN
-    DECLARE p, p_color CHAR;
-    DECLARE p_2, p_2_color CHAR;
-    DECLARE next_player_color CHAR;
+    DECLARE p, p_color VARCHAR(10);
+    DECLARE p_2, p_2_color VARCHAR(10);
+    DECLARE next_player_color VARCHAR(10);
     DECLARE next_player_token CHAR;
     DECLARE found_player BOOLEAN DEFAULT FALSE;
+    DECLARE piece_1, piece_2, piece_3, piece_4 VARCHAR(10);
+    DECLARE piece_1_c, piece_2_c, piece_3_c, piece_4_c VARCHAR(10);
     
     SELECT piece, piece_color INTO p_2, p_2_color 
     FROM `board` WHERE X = x2 AND Y = y2;
     
-	IF p_2 IS NOT NULL AND p_2_color IS NOT NULL THEN
-    UPDATE board
-    SET piece = p_2, piece_color = p_2_color
-    WHERE status = CONCAT('BASE_', p_2_color) AND piece IS NULL;
-    
-    UPDATE board
-    SET piece = NULL, piece_color = NULL
-    WHERE x = x2 AND y = y2;
-	END IF;
-
-
     SELECT piece, piece_color INTO p, p_color 
     FROM `board` WHERE X = x1 AND Y = y1;
+    
+   -- Ean to koutaki ekkinisis exei mono 1 pioni 
+ 	IF CHAR_LENGTH(TRIM(p)) = 1 THEN
+ 		-- ean to koutki proorismou einai adeio
+    	IF p_2 IS NULL AND p_2_color IS NULL THEN
+			UPDATE board
+         SET piece = p, piece_color = p_color
+         WHERE x = x2 AND y = y2;
 
-    UPDATE board
-    SET piece = p, piece_color = p_color
-    WHERE x = x2 AND y = y2;
+         UPDATE board
+         SET piece = NULL, piece_color = NULL
+         WHERE X = x1 AND Y = y1;
+      -- ean to koutaki proorismou exei 1 pioni
+      ELSEIF CHAR_LENGTH(TRIM(p_2)) = 1 THEN
+      	-- ean to 1 pioni sto koutaki proorismou einai idiou xromatos me to 1 pioni sto koutaki ekkinishs
+      	IF p_2_color = p_color THEN
+      		UPDATE board
+            SET piece = CONCAT(p_2, ',', p), piece_color = p_color
+            WHERE X = x2 AND Y = y2;
 
-    UPDATE board
-    SET piece = NULL, piece_color = NULL
-    WHERE X = x1 AND Y = y1;
+            UPDATE board
+            SET piece = NULL, piece_color = NULL
+            WHERE X = x1 AND Y = y1;
+         -- ean to 1 pioni sto koutaki proorismou DEN einai idiou xromatos me to 1 pioni sto koutaki ekkinishs
+         ELSE
+         	UPDATE board
+            SET piece = p_2, piece_color = p_2_color
+            WHERE status = CONCAT('BASE_', p_2_color) AND piece IS NULL;
 
+            UPDATE board
+            SET piece = p, piece_color = p_color
+            WHERE x = x2 AND y = y2;
+            
+            UPDATE board
+       		SET piece = NULL, piece_color = NULL
+        		WHERE X = x1 AND Y = y1;
+      	END IF;
+      -- Ean to koutaki proorismou exei 2 pionia
+      ELSEIF CHAR_LENGTH(TRIM(p_2)) = 3 THEN
+      	-- ean kai ta 2 pionia sto koutaki proorismou einai idiou xromatos me ekkinishs
+      	IF p_2_color = p_color THEN
+      		UPDATE board
+            SET piece = CONCAT(p_2, ',', p), piece_color = p_color
+            WHERE X = x2 AND Y = y2;
+
+            UPDATE board
+            SET piece = NULL, piece_color = NULL
+            WHERE X = x1 AND Y = y1;
+         -- koutaki proorismou exei 2 pionia diaforetikou xromatos me ekkinishs
+         ELSE
+         	SET piece_3 = TRIM(SUBSTRING_INDEX(p_2, ',', 1));
+				SET piece_4 = TRIM(SUBSTRING_INDEX(p_2, ',', -1));
+         	
+         	UPDATE board
+            SET piece = piece_3, piece_color = p_2_color
+            WHERE status = CONCAT('BASE_', p_2_color) AND piece IS NULL
+            LIMIT 1;
+            
+            UPDATE board
+            SET piece = piece_4, piece_color = p_2_color
+            WHERE status = CONCAT('BASE_', p_2_color) AND piece IS NULL
+            LIMIT 1;
+            
+            UPDATE board
+            SET piece = p, piece_color = p_color
+            WHERE x = x2 AND y = y2;
+            
+            UPDATE board
+            SET piece = NULL, piece_color = NULL
+            WHERE X = x1 AND Y = y1;
+      	END IF;
+    	END IF;
+   -- ekkinhsh exei 2 pionia
+   ELSEIF CHAR_LENGTH(TRIM(p)) = 3 THEN
+   	-- ean proorismos einai adeios
+   	IF p_2 IS NULL AND p_2_color IS NULL THEN
+   		SET piece_1 = SUBSTRING_INDEX(p, ',', 1);
+			SET piece_2 = SUBSTRING_INDEX(p, ',', -1);
+		
+			UPDATE board
+      	SET piece = piece_1, piece_color = p_color
+      	WHERE x = x2 AND y = y2;
+      
+      	UPDATE board
+      	SET piece = piece_2, piece_color = p_color
+      	WHERE x = x1 AND y = y1;
+      -- Proorismos exei 1 pioni diaf xromatos
+      ELSEIF CHAR_LENGTH(TRIM(p_2)) = 1 THEN
+      	SET piece_1 = SUBSTRING_INDEX(p, ',', 1);
+			SET piece_2 = SUBSTRING_INDEX(p, ',', -1);
+			
+			UPDATE board
+         SET piece = p_2, piece_color = p_2_color
+         WHERE status = CONCAT('BASE_', p_2_color) AND piece IS NULL
+         LIMIT 1;
+         
+         UPDATE board
+         SET piece = piece_1, piece_color = p_color
+         WHERE x = x2 AND y = y2;
+         
+         UPDATE board
+         SET piece = piece_2, piece_color = p_color
+         WHERE X = x1 AND Y = y1;
+      -- proorismos exei 2 pionia diaforetikou xromatos
+      ELSE
+      	SET piece_1 = SUBSTRING_INDEX(p, ',', 1);
+			SET piece_2 = SUBSTRING_INDEX(p, ',', -1);
+			
+			SET piece_3 = SUBSTRING_INDEX(p_2, ',', 1);
+			SET piece_4 = SUBSTRING_INDEX(p_2, ',', -1);
+			
+			SELECT piece_3, piece_4;
+			
+			UPDATE board
+         SET piece = piece_3, piece_color = p_2_color
+         WHERE status = CONCAT('BASE_', p_2_color) AND piece IS NULL
+         LIMIT 1;
+         
+         UPDATE board
+         SET piece = piece_4, piece_color = p_2_color
+         WHERE status = CONCAT('BASE_', p_2_color) AND piece IS NULL
+         LIMIT 1;
+         
+         UPDATE board
+         SET piece = piece_1, piece_color = p_color
+         WHERE x = x2 AND y = y2;
+         
+         UPDATE board
+         SET piece = piece_2, piece_color = p_color
+         WHERE X = x1 AND Y = y1;
+   	END IF;
+   END IF;
+    
     SET next_player_color =
         CASE
             WHEN p_color = 'Y' THEN 'G'
@@ -296,7 +411,7 @@ CREATE TABLE IF NOT EXISTS `players` (
 
 -- Dumping data for table ludo.players: ~4 rows (approximately)
 INSERT INTO `players` (`username`, `piece_color`, `token`, `last_action`) VALUES
-	(NULL, 'Y', NULL, '2024-01-02 20:07:09'),
+	(NULL, 'Y', NULL, NULL),
 	(NULL, 'G', NULL, NULL),
 	(NULL, 'B', NULL, NULL),
 	(NULL, 'R', NULL, NULL);
