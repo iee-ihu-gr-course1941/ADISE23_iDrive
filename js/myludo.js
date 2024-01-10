@@ -70,6 +70,7 @@ var playerPositions = {
 const winningNumbers = [41, 42, 43, 44];
 var me={};
 var me_extra=[];
+var me_extra_2=[];
 var me_extra_starting=[];
 var game_status={};
 
@@ -200,7 +201,8 @@ function getInfoPieces() {
 
 function login_error(data,y,z,c) {
 	var x = data.responseJSON;
-	alert(x.errormesg)
+	console.log(x);
+	//alert(x.errormesg)
 	$('#username').val("");
 }
 
@@ -314,6 +316,8 @@ async function do_zari() {
 }
 
 async function moveDice(color, pieceIndex, steps) {
+	await correct_pieces()
+
 	if (me_extra.length > 0 
 		&& playerPositions[color][pieceIndex-1] == 0) {
 		await isAtBase(pieceIndex);
@@ -322,6 +326,34 @@ async function moveDice(color, pieceIndex, steps) {
 	 await moveDicePawn (color, pieceIndex, steps);
 
 	 await isWinner(playerPositions[me.piece_color], winningNumbers);
+}
+
+async function correct_pieces() {
+	await $.ajax(
+		{url: "ludo.php/board/", 
+		 success: function(data) {
+			getPiecesBase(data);
+	} });
+}
+
+
+async function getPiecesBase(data){
+	me_extra = [];
+
+	console.log(me_extra);
+
+	for(var i=0;i<data.length;i++) {
+		var o = data[i];
+		if (o.piece_color == me.piece_color 
+			&& o.status == 'BASE_' + me.piece_color){
+			me_extra.push(o);
+			playerPositions[me.piece_color][o.piece - 1] = 0;
+			console.log(playerPositions[me.piece_color][o.piece - 1]);
+		}
+	}
+
+	console.log(me_extra);
+	console.log(playerPositions);
 }
 
 async function isWinner(array, numbers) {
@@ -343,7 +375,21 @@ async function isWinner(array, numbers) {
 
 		await announceWinner();
 		await empty_players();
+		await update_winner(me.piece_color);
 		//refreshWindow();
+		return;
+}
+
+async function update_winner(wcolor) {
+	$.ajax({
+		url: "ludo.php/status/",
+		method: 'PUT',
+		dataType: "json",
+		contentType: 'application/json',
+		data: JSON.stringify({color: wcolor}),
+		success: function(data) {
+			move_result(data);},
+	  });
 }
 
 async function empty_players() {
@@ -376,7 +422,7 @@ async function moveDicePawn (color, pieceIndex, steps) {
 	if (newPositionIndex < path.length) {
 		var newPosition = path[newPositionIndex];
 		var { x, y } = newPosition; 
-	  playerPositions[color][pieceIndex-1] = newPositionIndex;
+	    playerPositions[color][pieceIndex-1] = newPositionIndex;
   
 	  await $.ajax({
 		url: "ludo.php/board/piece/" + x1 + '/' + y1,
@@ -395,6 +441,10 @@ async function moveDicePawn (color, pieceIndex, steps) {
 async function isAtBase (pieceIndex) {
 	var element = [];
 	var length_m = me_extra.length;
+
+	me_extra.sort(function(a, b) {
+        return a.piece - b.piece;
+    });
 
 	for (var i=0; i<length_m; i++) {
 		element[i] = me_extra.pop();

@@ -11,6 +11,17 @@ function show_status() {
 	print json_encode($res->fetch_all(MYSQLI_ASSOC), JSON_PRETTY_PRINT);
 }
 
+function update_status_winner($winner_color) {
+	global $mysqli;
+
+	$new_status = 'ended'; 
+
+	$sql = 'update game_status set status=?, result=?';
+	$st = $mysqli->prepare($sql);
+	$st->bind_param('ss',$new_status, $winner_color);
+	$st->execute();
+}
+
 function update_game_status() {
 	global $mysqli;
 	
