@@ -14,12 +14,10 @@ function show_status() {
 function dice_turn() {
     global $mysqli;
 	
-	$sql = 'call dice_turn()';
+	$sql = 'call `dice_turn()`;';
+
 	$st = $mysqli->prepare($sql);
 	$st->execute();
-	$res = $st->get_result();
-	header('Content-type: application/json');
-	print json_encode($res->fetch_all(MYSQLI_ASSOC), JSON_PRETTY_PRINT);
 }
 
 function set_dice($d_dice, $d_color) {

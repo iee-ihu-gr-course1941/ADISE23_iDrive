@@ -81,7 +81,7 @@ $( function() {
 	$('#ludo_login').click(login_to_game);
 	$('#do_move').click(do_move);
 	$('#do_zari').click(do_zari);
-	//$('#first_do_zari').click(first_do_zari);
+	$('#first_do_zari').click(first_do_zari);
 	$('#roll_zari').click(set_zari);
 } );
 
@@ -99,21 +99,22 @@ async function first_do_zari() {
 			method: 'PUT',
 			dataType: "json",
 			contentType: 'application/json',
-			data: JSON.stringify({ dice: pint, color: me.piece_color }),
+			data: JSON.stringify({ dice: s, color: me.piece_color }),
 			success: console.log("Dice set!!"),
 			error: login_error});
-
+	
 			await $.ajax({
-				url: "ludo.php/dices/",
-				method: 'GET',
-				success: function(response) {
-					console.log("Turn set!!");
-					// You can handle the response data here if needed
-				},
-				error: function(error) {
-					console.error("Error:", error);
-				}
-			});
+    url: "ludo.php/dices/",
+    method: 'GET',
+    success: function(response) {
+        console.log("Turn set!!");
+        // You can handle the response data here if needed
+    },
+    error: function(error) {
+        console.error("Error:", error);
+    }
+});
+
 			
 }
 
@@ -448,7 +449,7 @@ async function isWinner(array, numbers) {
 		await announceWinner();
 		await empty_players();
 		await update_winner(me.piece_color);
-		//refreshWindow();
+		refreshWindow();
 		return;
 }
 

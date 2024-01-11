@@ -44,6 +44,21 @@ function set_user($b,$input) {
 		exit;
 	}
 
+	$sql = 'select status 
+            from game_status ';
+	$st = $mysqli->prepare($sql);
+	$st->execute();
+	$res = $st->get_result();
+	$r = $res->fetch_all(MYSQLI_ASSOC);
+
+	if($r[0] == 'started') {
+		header("HTTP/1.1 400 Bad Request");
+		print json_encode(['errormesg'=>"Game already started. Wait for the next"]);
+		exit;
+	}
+
+	
+
 	$sql = 'update players set username=?, 
             token=md5(CONCAT( ?, 
             NOW()))  where piece_color=?';
