@@ -91,11 +91,8 @@ function update_game_status() {
 		case 0: $new_status='not active'; 
 			break;
 		case 1: $new_status='started'; 
-				//$new_turn='Y';
 			break;
-		// το turn ειναι αναλογως ποιος φερει μεγαλυτερο αριθμο στο ζαρι
 		case 2: $new_status='started'; 
-				//$new_turn='Y';
 			break;
 	}
 

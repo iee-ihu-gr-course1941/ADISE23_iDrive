@@ -285,26 +285,8 @@ function game_status_update() {
 }
 
 function update_status(data) {
-	// if (game_status.p_turn==null 
-	// 	||  data[0].p_turn != game_status.p_turn 
-	// 	||  data[0].status != game_status.status) {
-	// 	fill_board();
-	// }
-
 	game_status=data[0];
 	update_info();
-
-	//  if(game_status.p_turn==me.piece_color &&  me.piece_color!=null) {
-	// 	x=0;
-	// 	// do play
-	// 	$('#move_div').show(1000);
-	// 	setTimeout(function() { game_status_update();}, 15000);
-	// } else {
-	// 	// must wait for something
-	// 	$('#move_div').hide(1000);
-	// 	setTimeout(function() { game_status_update();}, 4000);
-	// } 
- 	
 }
 
 function do_move() {
