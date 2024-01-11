@@ -11,6 +11,37 @@ function show_status() {
 	print json_encode($res->fetch_all(MYSQLI_ASSOC), JSON_PRETTY_PRINT);
 }
 
+function dice_turn() {
+    global $mysqli;
+	
+	$sql = 'call dice_turn()';
+	$st = $mysqli->prepare($sql);
+	$st->execute();
+	$res = $st->get_result();
+	header('Content-type: application/json');
+	print json_encode($res->fetch_all(MYSQLI_ASSOC), JSON_PRETTY_PRINT);
+}
+
+function set_dice($d_dice, $d_color) {
+    global $mysqli;
+	
+	$sql = 'update players 
+			set dice=?
+			where piece_color=?';
+	$st = $mysqli->prepare($sql);
+	$st->bind_param('ss',$d_dice, $d_color);
+	$st->execute();
+}
+
+function set_turn($b_turn) {
+    global $mysqli;
+	
+	$sql = 'update game_status set p_turn=?';
+	$st = $mysqli->prepare($sql);
+	$st->bind_param('s',$b_turn);
+	$st->execute();
+}
+
 function update_status_winner($winner_color) {
 	global $mysqli;
 
@@ -60,17 +91,17 @@ function update_game_status() {
 		case 0: $new_status='not active'; 
 			break;
 		case 1: $new_status='started'; 
-				$new_turn='Y';
+				//$new_turn='Y';
 			break;
 		// το turn ειναι αναλογως ποιος φερει μεγαλυτερο αριθμο στο ζαρι
 		case 2: $new_status='started'; 
-				$new_turn='Y';
+				//$new_turn='Y';
 			break;
 	}
 
-	$sql = 'update game_status set status=?, p_turn=?';
+	$sql = 'update game_status set status=?';
 	$st = $mysqli->prepare($sql);
-	$st->bind_param('ss',$new_status,$new_turn);
+	$st->bind_param('s',$new_status);
 	$st->execute();
 }
 

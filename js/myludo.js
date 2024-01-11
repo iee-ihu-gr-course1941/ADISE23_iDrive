@@ -61,10 +61,10 @@ const paths = {
 
 //each color's pieces
 var playerPositions = {
-	Y: [0, 0, 0, 0],
-	G: [0, 0, 0, 0],
-	B: [0, 0, 0, 0],
-	R: [0, 0, 0, 0],
+	Y: [-1, -1, -1, -1],
+	G: [-1, -1, -1, -1],
+	B: [-1, -1, -1, -1],
+	R: [-1, -1, -1, -1],
 };
 
 const winningNumbers = [41, 42, 43, 44];
@@ -81,7 +81,34 @@ $( function() {
 	$('#ludo_login').click(login_to_game);
 	$('#do_move').click(do_move);
 	$('#do_zari').click(do_zari);
+	$('#first_do_zari').click(first_do_zari);
+	$('#roll_zari').click(set_zari);
 } );
+
+async function first_do_zari() {
+	var s = $('#first_zari').val();
+	var a = s.trim().split(/[ ]+/);
+	if(a.length==0) {
+		alert('Must give 1 number');
+		return;
+	}
+
+	var pint = parseInt(a);
+
+	await $.ajax({url: "ludo.php/dice/", 
+			method: 'PUT',
+			dataType: "json",
+			contentType: 'application/json',
+			data: JSON.stringify({ dice: pint, color: me.piece_color }),
+			success: console.log("Dice set!!"),
+			error: login_error});
+
+	await $.ajax(
+		{url: "ludo.php/dices/", 
+		 success: function () {
+			console.log("Turn set!")} });
+
+}
 
 function draw_empty_board() {
 	var t='<table id="ludo_table">';
@@ -98,13 +125,15 @@ function draw_empty_board() {
 	$('#ludo_board').html(t);
 }
 
-function fill_board() {
+function fill_board(fbp_color) {
+	
 	$.ajax(
 		{url: "ludo.php/board/", 
-		 success: fill_board_by_data });
+		 success: function (data) {
+			fill_board_by_data(data, fbp_color)} });
 }
 
-function fill_board_by_data(data) {
+function fill_board_by_data(data, fp_color) {
 	for(var i=0;i<data.length;i++) {
 		var o = data[i];
 		var id = '#square_'+ o.x +'_' + o.y;
@@ -112,16 +141,49 @@ function fill_board_by_data(data) {
         var im = (o.piece!=null)?'<img class="piece" src="images/'+c+'.png">':'';
 		$(id).addClass(o.b_color+'_square').html(im);
 	}
+
+	// if (fp_color === undefined) {
+	// 	var rotationDegree = getRotationDegree(null);
+	// } else {
+	// 	var rotationDegree = getRotationDegree(fp_color);
+	// }
+	
+	// $('#ludo_table').css({
+    //     'transform': 'rotate(' + rotationDegree + 'deg)',
+    //     'transform-origin': 'center'
+    // });
+
+	// $('#ludo_board .piece').css({
+    //     'transform': 'rotate(' + (-rotationDegree) + 'deg)',
+    //     'transform-origin': 'center center'
+    // });
+	
 	console.log(data);
 }
 
+function getRotationDegree(r_piece_color) {
+    switch (r_piece_color) {
+        case 'Y':
+            return 0;
+        case 'G':
+            return -90;
+        case 'B':
+            return 180;
+        case 'R':
+            return 90;
+        default:
+            return 0;  
+    }
+}
+
 async function reset_board() {
-	playerPositions[me.piece_color] = [0,0,0,0];
+	playerPositions[me.piece_color] = [-1, -1, -1, -1];
 
 	await $.ajax(
 		{url: "ludo.php/board/", 
          method: 'post',
-		 success: fill_board_by_data 
+		 success: function (data) {
+			fill_board_by_data (data, me.piece_color) }
 		}
 		);
 }
@@ -132,8 +194,8 @@ function login_to_game() {
 		return;
 	}
 	var p_color = $('#pcolor').val();
-	draw_empty_board(p_color);
-	fill_board();
+	draw_empty_board();
+	fill_board(p_color);
 	
 	$.ajax({url: "ludo.php/players/"+p_color, 
 			method: 'PUT',
@@ -156,8 +218,9 @@ function login_result(data) {
 	getInfoPieces();
 }
 
-function getInfoPieces() {
-	$.ajax(
+async function getInfoPieces() {
+	playerPositions[me.piece_color][0] = 0;
+	await $.ajax(
 		{url: "ludo.php/board/", 
 		 success: function(data) {
 			getColorPieces(data);
@@ -202,7 +265,7 @@ function getInfoPieces() {
 function login_error(data,y,z,c) {
 	var x = data.responseJSON;
 	console.log(x);
-	//alert(x.errormesg)
+	alert(x.errormesg)
 	$('#username').val("");
 }
 
@@ -293,6 +356,10 @@ function getColorStarting(data) {
 	console.log(me_extra_starting);
 }
 
+function set_zari() {
+	$('#zari').val(getRandomInt(1, 6));
+}
+
 async function do_zari() {
 	var s = $('#zari').val();
 	var a = s.trim().split(/[ ]+/);
@@ -304,12 +371,12 @@ async function do_zari() {
 	var p = $('#pawn').val();
 	var pa = p.trim().split(/[ ]+/);
 	if(pa.length==0) {
-		alert('Must give 1 number');
+		alert('Declare which pawn.');
 		return;
 	}
 
 	var pint = parseInt(pa);
-	var sint = parseInt(a);
+	var sint =  parseInt(a);
 	var t_color = me.piece_color;
 
 	await moveDice(t_color, pint, sint);
@@ -319,8 +386,24 @@ async function moveDice(color, pieceIndex, steps) {
 	await correct_pieces()
 
 	if (me_extra.length > 0 
-		&& playerPositions[color][pieceIndex-1] == 0) {
+		&& playerPositions[color][pieceIndex-1] == -1) {
+		if (steps != 6) {
+			alert("You need to roll a 6 to move the " +pieceIndex + " pawn out of the base!");
+			return;
+		}
 		await isAtBase(pieceIndex);
+
+		await $.ajax({
+			url: "ludo.php/turn/",
+			method: 'PUT',
+			dataType: "json",
+			contentType: 'application/json',
+			data: JSON.stringify({ turn: me.piece_color}),
+			success: console.log("All ok"),
+			error: login_error
+		  });	
+
+		return;
 	}
 
 	 await moveDicePawn (color, pieceIndex, steps);
@@ -347,7 +430,7 @@ async function getPiecesBase(data){
 		if (o.piece_color == me.piece_color 
 			&& o.status == 'BASE_' + me.piece_color){
 			me_extra.push(o);
-			playerPositions[me.piece_color][o.piece - 1] = 0;
+			playerPositions[me.piece_color][o.piece - 1] = -1;
 			console.log(playerPositions[me.piece_color][o.piece - 1]);
 		}
 	}
@@ -479,15 +562,21 @@ async function isAtBase (pieceIndex) {
 				contentType: 'application/json',
 				data: JSON.stringify({ x: x_curr1, y: y_curr1, token: me.token }), 
 				success: function(data) {
-					move_result(data);
+					move_result(data, me.piece_color);
 					console.log("Base Sec AJAX success:", data);},
 				error: login_error
 			  });
 		}
 	}
 
+	playerPositions[me.piece_color][pieceIndex-1] = 0;
+
 }
 
-function move_result(data){
-	fill_board_by_data(data);
+function move_result(data, mrp_color){
+	fill_board_by_data(data, mrp_color);
+}
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }

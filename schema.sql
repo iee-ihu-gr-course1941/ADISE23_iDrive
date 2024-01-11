@@ -202,6 +202,53 @@ REPLACE INTO players SELECT * FROM players_empty;
 END//
 DELIMITER ;
 
+-- Dumping structure for procedure ludo.dice_turn
+DELIMITER //
+CREATE PROCEDURE `dice_turn`()
+BEGIN
+   DECLARE maxDiceValue INT;
+   DECLARE done BOOLEAN;
+   DECLARE startingPlayerPieceColor VARCHAR(255);
+   DECLARE currentPlayerPieceColor VARCHAR(255);
+   DECLARE currentPlayerDice INT;
+    
+   DECLARE playerCursor CURSOR FOR
+   	SELECT piece_color, dice 
+      FROM players 
+      WHERE dice IS NOT NULL AND token IS NOT NULL;
+   
+   DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+   
+   SET maxDiceValue = 0;
+
+   OPEN playerCursor;
+   
+   read_loop: LOOP
+
+   	FETCH playerCursor INTO currentPlayerPieceColor, currentPlayerDice;
+   
+   	IF done THEN
+     		LEAVE read_loop;
+    	END IF;
+        
+ 		IF currentPlayerDice > maxDiceValue THEN
+         SET maxDiceValue = currentPlayerDice;
+         SET startingPlayerPieceColor = currentPlayerPieceColor;
+      END IF;
+      
+   END LOOP;
+      
+   CLOSE playerCursor;
+
+   IF maxDiceValue > 0 THEN
+      UPDATE game_status
+      SET p_turn = startingPlayerPieceColor;
+   ELSE
+      SELECT 'No rows found!' AS result;
+   END IF;
+END//
+DELIMITER ;
+
 -- Dumping structure for table ludo.game_status
 CREATE TABLE IF NOT EXISTS `game_status` (
   `status` enum('not active','initialized','started','ended','aborded') NOT NULL DEFAULT 'not active',
@@ -210,9 +257,9 @@ CREATE TABLE IF NOT EXISTS `game_status` (
   `last_change` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table ludo.game_status: ~2 rows (approximately)
+-- Dumping data for table ludo.game_status: ~1 rows (approximately)
 INSERT INTO `game_status` (`status`, `p_turn`, `result`, `last_change`) VALUES
-	('started', 'Y', 'Y', '2024-01-01 19:04:11');
+	('started', 'Y', 'Y', '2024-01-11 19:10:12');
 
 -- Dumping structure for procedure ludo.move_piece
 DELIMITER //
@@ -406,15 +453,16 @@ CREATE TABLE IF NOT EXISTS `players` (
   `piece_color` enum('Y','G','B','R') NOT NULL,
   `token` varchar(100) DEFAULT NULL,
   `last_action` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`piece_color`)
+  `dice` int(11) DEFAULT NULL,
+  PRIMARY KEY (`piece_color`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table ludo.players: ~4 rows (approximately)
-INSERT INTO `players` (`username`, `piece_color`, `token`, `last_action`) VALUES
-	(NULL, 'Y', NULL, NULL),
-	(NULL, 'G', NULL, NULL),
-	(NULL, 'B', NULL, NULL),
-	(NULL, 'R', NULL, NULL);
+INSERT INTO `players` (`username`, `piece_color`, `token`, `last_action`, `dice`) VALUES
+	(NULL, 'Y', NULL, '2024-01-11 19:10:43', NULL),
+	(NULL, 'G', NULL, '2024-01-11 19:09:57', NULL),
+	(NULL, 'B', NULL, NULL, NULL),
+	(NULL, 'R', NULL, '2024-01-11 18:43:37', NULL);
 
 -- Dumping structure for table ludo.players_empty
 CREATE TABLE IF NOT EXISTS `players_empty` (
@@ -422,15 +470,29 @@ CREATE TABLE IF NOT EXISTS `players_empty` (
   `piece_color` enum('Y','G','B','R') NOT NULL,
   `token` varchar(100) DEFAULT NULL,
   `last_action` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `dice` int(11) DEFAULT NULL,
   PRIMARY KEY (`piece_color`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 
 -- Dumping data for table ludo.players_empty: ~4 rows (approximately)
-INSERT INTO `players_empty` (`username`, `piece_color`, `token`, `last_action`) VALUES
-	(NULL, 'Y', NULL, NULL),
-	(NULL, 'G', NULL, NULL),
-	(NULL, 'B', NULL, NULL),
-	(NULL, 'R', NULL, NULL);
+INSERT INTO `players_empty` (`username`, `piece_color`, `token`, `last_action`, `dice`) VALUES
+	(NULL, 'Y', NULL, NULL, NULL),
+	(NULL, 'G', NULL, NULL, NULL),
+	(NULL, 'B', NULL, NULL, NULL),
+	(NULL, 'R', NULL, NULL, NULL);
+
+-- Dumping structure for trigger ludo.update_turn
+SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_ZERO_IN_DATE,NO_ZERO_DATE,NO_ENGINE_SUBSTITUTION';
+DELIMITER //
+CREATE TRIGGER update_turn
+AFTER UPDATE ON players
+FOR EACH ROW
+BEGIN
+        UPDATE game_status
+        SET p_turn = NEW.piece_color;
+END//
+DELIMITER ;
+SET SQL_MODE=@OLDTMP_SQL_MODE;
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
